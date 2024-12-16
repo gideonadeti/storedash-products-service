@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "services:dev": "pnpm --parallel --filter \"./services/*\" run dev",
-    "service:auth": "pnpm --filter \"./services/auth-service\" dev",
-    "service:order": "pnpm --filter \"./services/order-service\" dev",
-    "service:inventory": "pnpm --filter \"./services/inventoryservice\" dev",
+    "dev:all": "pnpm --parallel --filter \"./services/*\" run dev",
+    "dev:auth": "pnpm --filter \"./services/auth-service\" dev",
+    "dev:order": "pnpm --filter \"./services/order-service\" dev",
+    "dev:inventory": "pnpm --filter \"./services/inventoryservice\" dev",
     "debug:list-services": "pnpm m ls",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -15,10 +15,11 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "prettier": "^3.4.2"
-  },
-  "dependencies": {
-    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

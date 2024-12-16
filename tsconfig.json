@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "ES6",
+    "target": "ES6",
+    "moduleResolution": "node",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@services/*": ["services/*"]
+    }
+  },
+  "include": ["services/**/*.ts"],
+  "exclude": ["node_modules"]
+}

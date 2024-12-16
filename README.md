@@ -74,20 +74,20 @@ You can run all services in parallel or a specific service.
 #### Run All Services:
 
 ```bash
-pnpm run services:dev
+pnpm run dev:all
 ```
 
 #### Run a Specific Service:
 
 ```bash
 # Auth Service
-pnpm run service:dev auth-service
+pnpm run dev:auth
 
 # Order Service
-pnpm run service:dev order-service
+pnpm run dev:order
 
 # Inventory Service
-pnpm run service:dev inventory-service
+pnpm run dev:inventory
 ```
 
 ### Debugging Services
@@ -95,7 +95,7 @@ pnpm run service:dev inventory-service
 To list all services in the monorepo:
 
 ```bash
-pnpm run services:list
+pnpm run debug:list-services
 ```
 
 This command will show all detected services and their dependencies.
