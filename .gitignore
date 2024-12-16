@@ -1,0 +1,48 @@
+# Node.js
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+
+# pnpm-specific
+pnpm-lock.yaml
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# Build outputs
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+.env.local
+.env.production
+.env.test
+
+# Generated files
+*.cache
+*.out

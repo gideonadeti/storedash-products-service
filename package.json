@@ -1,0 +1,24 @@
+{
+  "name": "storedash-backend-services",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "services:dev": "pnpm --parallel --filter \"./services/*\" run dev",
+    "service:auth": "pnpm --filter \"./services/auth-service\" dev",
+    "service:order": "pnpm --filter \"./services/order-service\" dev",
+    "service:inventory": "pnpm --filter \"./services/inventoryservice\" dev",
+    "debug:list-services": "pnpm m ls",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  },
+  "dependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
