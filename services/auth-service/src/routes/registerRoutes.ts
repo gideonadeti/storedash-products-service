@@ -1,11 +1,14 @@
 import express from 'express';
-import { registerDriver } from '../controllers/registerController';
+import {
+  registerDriver,
+  registerRetailer,
+} from '../controllers/registerController';
 
 const router = express.Router();
 
-// router.post('/admin', getAllUsers);
-router.post('/driver', registerDriver);
-// router.post('/distributor', getAllUsers);
-// router.post('/retailer', getAllUsers);
+router.route('/driver').post(registerDriver);
+
+router.route('/retailer').post(registerRetailer);
+router.route('/retailer/:id').post(registerRetailer);
 
 export default router;

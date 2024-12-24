@@ -8,6 +8,6 @@ const app = express();
 // Middleware
 app.use(express.json());
 // API Routes
-app.use('/', routes);
+app.use('/auth', routes);
 
 export default app;

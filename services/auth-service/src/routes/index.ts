@@ -3,6 +3,6 @@ import registerRoutes from './registerRoutes';
 
 const router = express.Router();
 
-router.use('/register', registerRoutes);
+router.use('/', registerRoutes);
 
 export default router;
