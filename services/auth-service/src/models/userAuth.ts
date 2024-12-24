@@ -6,7 +6,7 @@ export interface IUserAuth extends Document {
   id: string;
   phoneNumber?: string;
   email?: string;
-  password: string;
+  password?: string;
   role: 'admin' | 'driver' | 'distributor' | 'retailer';
   token?: string;
   refreshToken?: string;

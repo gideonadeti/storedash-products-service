@@ -4,7 +4,7 @@ import RegistrationService from '../services/registrationService';
 export const registerDriver = async (req: Request, res: Response) => {
   try {
     const { phoneNumber, email, password } = req.body;
-    console.log('phone number', phoneNumber, email, password);
+
     // Call the service to register a driver
     const newDriver = await RegistrationService.registerDriver({
       phoneNumber,
