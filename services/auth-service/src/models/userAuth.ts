@@ -1,8 +1,8 @@
 import mongoose, { Document } from 'mongoose';
-import uuidv4, { validate } from 'uuid';
+import { v4 as uuidV4 } from 'uuid';
 
 // Define the TypeScript interface for the document
-interface IUserAuth extends Document {
+export interface IUserAuth extends Document {
   id: string;
   phoneNumber?: string;
   email?: string;
@@ -18,7 +18,7 @@ const userAuthSchema = new mongoose.Schema<IUserAuth>(
   {
     id: {
       type: String,
-      default: uuidv4.v4,
+      default: uuidV4,
       unique: true,
       immutable: true,
     },
@@ -45,7 +45,7 @@ const userAuthSchema = new mongoose.Schema<IUserAuth>(
           return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); // Basic email validation
         },
         message: (props: { value: string }) =>
-          `${props.value} is not a valid phone number!`,
+          `${props.value} is not a valid email address!`,
       },
     },
     password: {
