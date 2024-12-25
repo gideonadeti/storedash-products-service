@@ -5,6 +5,7 @@ export const createRetailerProfile = async (req: Request, res: Response) => {
     const { session, otp, name } = req.body;
     const { id: userAuthId } = req.params;
     //verify user otp
+
     // if otp is correect, create the profile, else,
   } catch (error: any) {
     res

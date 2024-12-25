@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { JWTPayload } from '../types/JWTPalyload';
+import UserAuth from '../models/userAuth';
 
 const ACCESS_TOKEN_SECRET =
   process.env.ACCESS_TOKEN_SECRET || 'your_access_token_secret';

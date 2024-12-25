@@ -1,6 +1,7 @@
 import mongoose, { Document } from 'mongoose';
 import { v4 as uuidV4 } from 'uuid';
-
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 // Define the TypeScript interface for the document
 export interface IUserAuth extends Document {
   id: string;
@@ -8,10 +9,12 @@ export interface IUserAuth extends Document {
   email?: string;
   password?: string;
   role: 'admin' | 'driver' | 'distributor' | 'retailer';
-  token?: string;
+  tokens?: { token: string }[];
   refreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
+  generateAccessToken: () => Promise<string>;
+  generateRefreshToken: () => Promise<string>;
 }
 
 const userAuthSchema = new mongoose.Schema<IUserAuth>(
@@ -59,9 +62,11 @@ const userAuthSchema = new mongoose.Schema<IUserAuth>(
       enum: ['admin', 'driver', 'distributor', 'retailer'],
       required: true,
     },
-    token: {
-      type: String,
-    },
+    tokens: [
+      {
+        token: { type: String, required: true },
+      },
+    ],
     refreshToken: {
       type: String,
     },
@@ -87,6 +92,57 @@ userAuthSchema.pre('validate', function (next) {
   }
   next();
 });
+
+userAuthSchema.methods.generateAccessToken = async function () {
+  const ACCESS_TOKEN = {
+    secret: process.env.AUTH_ACCESS_TOKEN_SECRET!,
+    expiry: process.env.AUTH_ACCESS_TOKEN_EXPIRY,
+  };
+  const user = this as IUserAuth;
+
+  const accessToken = jwt.sign(
+    {
+      id: user.id,
+      role: user.role,
+    },
+    ACCESS_TOKEN.secret,
+    {
+      expiresIn: ACCESS_TOKEN.expiry,
+    }
+  );
+  return accessToken;
+};
+
+userAuthSchema.methods.generateRefreshToken = async function () {
+  const REFRESH_TOKEN = {
+    secret: process.env.AUTH_REFRESH_TOKEN_SECRET!,
+    expiry: process.env.AUTH_REFRESH_TOKEN_EXPIRY,
+  };
+  const user = this as IUserAuth;
+
+  const refreshToken = jwt.sign(
+    {
+      id: user.id,
+      role: user.role,
+    },
+    REFRESH_TOKEN.secret,
+    {
+      expiresIn: REFRESH_TOKEN.expiry,
+    }
+  );
+
+  const rTknHash = crypto
+    .createHmac('sha256', REFRESH_TOKEN.secret)
+    .update(refreshToken)
+    .digest('hex');
+
+  //saving refresh token hash to db
+  user.tokens?.push({ token: rTknHash });
+
+  await user.save();
+
+  return refreshToken;
+};
 
 const UserAuth = mongoose.model<IUserAuth>('UserAuth', userAuthSchema);
 export default UserAuth;

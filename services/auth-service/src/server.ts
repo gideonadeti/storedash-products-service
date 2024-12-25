@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 
 const PORT = process.env.PORT || 3003;
 
+console.log(process.env.MONGO_DB_URL);
 connectToDB()
   .then(() => {
     app.listen(PORT, () => {
