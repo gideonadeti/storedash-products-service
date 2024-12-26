@@ -1,5 +1,4 @@
 import mongoose, { Document } from 'mongoose';
-import { v4 as uuidV4 } from 'uuid';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 // Define the TypeScript interface for the document
@@ -17,14 +16,8 @@ export interface IUserAuth extends Document {
   generateRefreshToken: () => Promise<string>;
 }
 
-const userAuthSchema = new mongoose.Schema<IUserAuth>(
+export const userAuthSchema = new mongoose.Schema<IUserAuth>(
   {
-    id: {
-      type: String,
-      default: uuidV4,
-      unique: true,
-      immutable: true,
-    },
     phoneNumber: {
       type: String,
       unique: true,

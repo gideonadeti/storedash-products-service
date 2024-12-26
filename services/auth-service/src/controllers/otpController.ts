@@ -46,14 +46,14 @@ const validateOtp = async (req: Request, res: Response) => {
   try {
     const { sid, code, userId } = req.body;
 
-    // // Call the service to validate the OTP
-    // const verificationCheck = await TwilioService.verifyOtp(sid, code);
-    // if (verificationCheck.status !== 'approved') {
-    //   throw new CustomError(
-    //     'Verification result: ' + verificationCheck.status,
-    //     401
-    //   );
-    // }
+    // Call the service to validate the OTP
+    const verificationCheck = await TwilioService.verifyOtp(sid, code);
+    if (verificationCheck.status !== 'approved') {
+      throw new CustomError(
+        'Verification result: ' + verificationCheck.status,
+        401
+      );
+    }
 
     // generate token and save to db
     const user = await UserAuth.findOne({ id: userId });
