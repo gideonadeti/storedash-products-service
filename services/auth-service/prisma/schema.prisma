@@ -1,0 +1,116 @@
+datasource db {
+    provider = "mongodb"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model AuthUser {
+    id          String       @id @default(auto()) @map("_id") @db.ObjectId
+    email       String?      @unique
+    phoneNumber String?      @unique
+    password    String?
+    role        Role
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    Token       Token[]
+    Retailer    Retailer?
+    Distributor Distributor?
+    Driver      Driver?
+
+    @@index([email, phoneNumber]) // Optimized index for querying
+}
+
+model Token {
+    id        String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId    String   @db.ObjectId
+    token     String   @unique
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+    user      AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@index([userId]) // Query tokens by user and type
+}
+
+enum Role {
+    ADMIN
+    DRIVER
+    DISTRIBUTOR
+    RETAILER
+}
+
+model Retailer {
+    id           String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId       String   @unique @db.ObjectId
+    user         AuthUser @relation(fields: [userId], references: [id])
+    storeName    String
+    storeAddress String
+    ownerName    String
+    profileImage String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
+
+model Distributor {
+    id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+    userId               String   @unique @db.ObjectId
+    user                 AuthUser @relation(fields: [userId], references: [id])
+    businessName         String
+    businessEmailAdress  String
+    businessPhoneNumber  String
+    landmark             String
+    businessLogo         String
+    serviceUserAgreement String //not sure about the type here
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @updatedAt
+}
+
+model Driver {
+    id                        String      @id @default(auto()) @map("_id") @db.ObjectId
+    userId                    String      @unique @db.ObjectId
+    user                      AuthUser    @relation(fields: [userId], references: [id])
+    fullName                  String
+    phoneNumber               String      @unique
+    email                     String?     @unique
+    nin                       String?     @unique
+    type                      DriverType
+    address                   String
+    vehicle                   Vehicle     @relation(fields: [vehicleId], references: [id])
+    guarantor                 Guarantor[]
+    guarantorId               String      @db.ObjectId
+    TnCSigned                 Boolean
+    consentToBackgroundSearch Boolean
+    vehicleId                 String      @unique @db.ObjectId
+    createdAt                 DateTime    @default(now())
+    updatedAt                 DateTime    @updatedAt
+}
+
+enum DriverType {
+    DISTRIBUTOR
+    INDEPENDENT
+}
+
+model Guarantor {
+    id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+    name               String
+    phoneNumber        String
+    email              String
+    residentialAddress String
+    Driver             Driver?  @relation(fields: [driverId], references: [id], onDelete: Cascade)
+    driverId           String?  @db.ObjectId
+    createdAt          DateTime @default(now())
+    updatedAt          DateTime @updatedAt
+}
+
+model Vehicle {
+    id          String   @id @default(auto()) @map("_id") @db.ObjectId
+    model       String
+    plateNumber String   @unique
+    color       String
+    driverId    String   @db.ObjectId
+    Driver      Driver?
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
