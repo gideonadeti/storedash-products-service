@@ -7,7 +7,7 @@ const app = express();
 // Middleware
 app.use(express.json());
 // API Routes
-app.use('/auth', routes);
+app.use('/', routes);
 
 // Handle unregistered route for all HTTP Methods
 app.all('*', function (req, res, next) {

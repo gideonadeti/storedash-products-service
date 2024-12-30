@@ -30,7 +30,7 @@ const requireAuthentication = async (
 
     // Attach authenticated user and Access Token to request object
     // @ts-ignore
-    req.userId = decoded._id;
+    req.accountId = decoded._id;
     // @ts-ignore
     req.token = aTkn;
     next();

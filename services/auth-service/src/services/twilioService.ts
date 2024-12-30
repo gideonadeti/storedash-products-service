@@ -20,7 +20,7 @@ class TwilioService {
     return verification;
   };
 
-  verifyOtp = async (sid: string, code: string) => {
+  verifyOtp = async (sid: string, to: string, code: string) => {
     const { TWILIO_VERIFY_SERVICE_SID } = process.env;
     if (!TWILIO_VERIFY_SERVICE_SID) {
       throw new Error('TWILIO_VERIFY_SERVICE_SID is not defined');
@@ -29,6 +29,7 @@ class TwilioService {
       .verify.v2.services(TWILIO_VERIFY_SERVICE_SID)
       .verificationChecks.create({
         code,
+        to,
         verificationSid: sid,
       });
 

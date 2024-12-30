@@ -8,30 +8,40 @@ generator client {
 }
 
 model AuthUser {
-    id          String       @id @default(auto()) @map("_id") @db.ObjectId
-    email       String?      @unique
-    phoneNumber String?      @unique
-    password    String?
-    role        Role
-    createdAt   DateTime     @default(now())
-    updatedAt   DateTime     @updatedAt
-    Token       Token[]
-    Retailer    Retailer?
-    Distributor Distributor?
-    Driver      Driver?
+    id            String         @id @default(auto()) @map("_id") @db.ObjectId
+    email         String?        @unique
+    phoneNumber   String?        @unique
+    password      String?
+    role          Role
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    Token         Token[]
+    Retailer      Retailer?
+    Distributor   Distributor?
+    Driver        Driver?
+    accountStatus AccountStatus? @default(PENDING_APPROVAL)
 
     @@index([email, phoneNumber]) // Optimized index for querying
 }
 
+enum AccountStatus {
+    ACTIVE
+    INACTIVE
+    SUSPENDED
+    DELETED
+    UNVERIFIED
+    PENDING_APPROVAL
+}
+
 model Token {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    userId    String   @db.ObjectId
+    accountId String   @db.ObjectId
     token     String   @unique
     expiresAt DateTime
     createdAt DateTime @default(now())
-    user      AuthUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user      AuthUser @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
-    @@index([userId]) // Query tokens by user and type
+    @@index([accountId]) // Query tokens by user and type
 }
 
 enum Role {
@@ -43,8 +53,8 @@ enum Role {
 
 model Retailer {
     id           String   @id @default(auto()) @map("_id") @db.ObjectId
-    userId       String   @unique @db.ObjectId
-    user         AuthUser @relation(fields: [userId], references: [id])
+    accountId    String   @unique @db.ObjectId
+    user         AuthUser @relation(fields: [accountId], references: [id])
     storeName    String
     storeAddress String
     ownerName    String
@@ -55,8 +65,8 @@ model Retailer {
 
 model Distributor {
     id                   String   @id @default(auto()) @map("_id") @db.ObjectId
-    userId               String   @unique @db.ObjectId
-    user                 AuthUser @relation(fields: [userId], references: [id])
+    accountId            String   @unique @db.ObjectId
+    user                 AuthUser @relation(fields: [accountId], references: [id])
     businessName         String
     businessEmailAdress  String
     businessPhoneNumber  String
@@ -70,8 +80,8 @@ model Distributor {
 
 model Driver {
     id                        String       @id @default(auto()) @map("_id") @db.ObjectId
-    userId                    String       @unique @db.ObjectId
-    user                      AuthUser     @relation(fields: [userId], references: [id])
+    accountId                 String       @unique @db.ObjectId
+    user                      AuthUser     @relation(fields: [accountId], references: [id])
     fullName                  String
     phoneNumber               String       @unique
     nin                       String?      @unique
