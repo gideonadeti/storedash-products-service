@@ -6,7 +6,7 @@ export const createDistributorDto = z.object({
   businessPhoneNumber: z.string(),
   landmark: z.string(),
   businessLogo: z.string().url(),
-  serviceUserAgreement: z.string().optional(),
+  serviceUserAgreement: z.string(),
 });
 
 export const updateDistributorDto = z.object({
