@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const createDriverDto = z
   .object({
     fullName: z.string(),
-
     nin: z.string(),
     type: z.enum(['DISTRIBUTOR', 'INDEPENDENT']),
     address: z.string(),
@@ -11,14 +10,13 @@ export const createDriverDto = z
     consentToBackgroundSearch: z.boolean(),
     distributorId: z.string().optional(),
   })
-  .refine((data) => data.type === 'DISTRIBUTOR' && data.distributorId, {
+  .refine((data) => data.type !== 'DISTRIBUTOR' || data.distributorId, {
     message: 'Distributor id is required when driver type is distributor',
-    path: ['type', 'distributorId'],
+    path: ['distributorId'],
   });
 
 export const updateDriverDto = z.object({
   fullName: z.string().optional(),
-  phoneNumber: z.string().optional(),
   nin: z.string().optional(),
   address: z.string().optional(),
 });
@@ -32,7 +30,7 @@ export const addGuarantorToDriverDto = z.object({
 });
 
 export const addDriverVehicleDto = z.object({
-  driverId: z.string(),
+  driverAccountId: z.string(),
   model: z.string(),
   plateNumber: z.string(),
   color: z.string(),

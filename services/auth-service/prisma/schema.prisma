@@ -83,16 +83,14 @@ model Driver {
     accountId                 String       @unique @db.ObjectId
     user                      AuthUser     @relation(fields: [accountId], references: [id])
     fullName                  String
-    phoneNumber               String       @unique
     nin                       String?      @unique
     type                      DriverType
     address                   String
-    vehicle                   Vehicle      @relation(fields: [vehicleId], references: [id])
+    vehicle                   Vehicle?     @relation(fields: [vehicleId], references: [id])
     guarantor                 Guarantor[]
-    guarantorId               String       @db.ObjectId
     TnCSigned                 Boolean
     consentToBackgroundSearch Boolean
-    vehicleId                 String       @unique @db.ObjectId
+    vehicleId                 String?      @unique @db.ObjectId
     createdAt                 DateTime     @default(now())
     updatedAt                 DateTime     @updatedAt
     distributorId             String?      @db.ObjectId
