@@ -8,6 +8,7 @@
     "dev:auth": "pnpm --filter \"./services/auth-service\" dev",
     "dev:order": "pnpm --filter \"./services/order-service\" dev",
     "dev:inventory": "pnpm --filter \"./services/inventoryservice\" dev",
+    "dev:product": "pnpm --filter \"./services/product-service\" dev",
     "debug:list-services": "pnpm m ls",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
