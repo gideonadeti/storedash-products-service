@@ -75,7 +75,7 @@ export async function handleProductsGet(req: Request, res: Response) {
   try {
     const products = await readProducts(distributorId as string);
 
-    res.status(200).json(products);
+    res.json(products);
   } catch (error) {
     console.error('Error reading products:', error);
     res.status(500).json({ errMsg: 'Error reading products' });
@@ -94,7 +94,7 @@ export async function handleProductDelete(req: Request, res: Response) {
   try {
     await deleteProduct(productId);
 
-    res.status(200).json({ msg: 'Product deleted successfully' });
+    res.json({ msg: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ errMsg: 'Error deleting product' });
