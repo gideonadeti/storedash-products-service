@@ -3,7 +3,7 @@ import fs from 'fs';
 import { Request, Response } from 'express';
 import { v2 as cloudinary } from 'cloudinary';
 
-import { createProduct } from '../db/index';
+import { createProduct, readProducts, deleteProduct } from '../db/index';
 
 dotenv.config();
 cloudinary.config({
@@ -60,6 +60,44 @@ export async function handleProductsPost(req: Request, res: Response) {
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ errMsg: 'Error creating product' });
+    return;
+  }
+}
+
+export async function handleProductsGet(req: Request, res: Response) {
+  const { distributorId } = req.query;
+
+  if (!distributorId) {
+    res.status(400).json({ errMsg: 'distributorId is required' });
+    return;
+  }
+
+  try {
+    const products = await readProducts(distributorId as string);
+
+    res.status(200).json(products);
+  } catch (error) {
+    console.error('Error reading products:', error);
+    res.status(500).json({ errMsg: 'Error reading products' });
+    return;
+  }
+}
+
+export async function handleProductDelete(req: Request, res: Response) {
+  const { productId } = req.params;
+
+  if (!productId) {
+    res.status(400).json({ errMsg: 'productId is required' });
+    return;
+  }
+
+  try {
+    await deleteProduct(productId);
+
+    res.status(200).json({ msg: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ errMsg: 'Error deleting product' });
     return;
   }
 }

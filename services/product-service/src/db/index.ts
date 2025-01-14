@@ -43,3 +43,17 @@ export async function createProduct(
     throw error;
   }
 }
+
+export async function deleteProduct(productId: string) {
+  try {
+    await prismaClient.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+
+    throw error;
+  }
+}
