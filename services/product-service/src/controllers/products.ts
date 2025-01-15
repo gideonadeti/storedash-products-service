@@ -18,7 +18,8 @@ cloudinary.config({
 });
 
 export async function handleProductsPost(req: Request, res: Response) {
-  const { distributorId, name, description, price, quantity } = req.body;
+  const { distributorId } = req.query;
+  const { name, description, price, quantity } = req.body;
   const files = req.files;
 
   if (!distributorId || !name || !price || !quantity) {
@@ -53,9 +54,9 @@ export async function handleProductsPost(req: Request, res: Response) {
 
   try {
     await createProduct(
-      distributorId,
-      name,
-      description,
+      distributorId as string,
+      name.trim(),
+      description.trim(),
       +price,
       +quantity,
       imageUrls
