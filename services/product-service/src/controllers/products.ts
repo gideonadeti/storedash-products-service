@@ -117,7 +117,7 @@ export async function handleProductsPut(req: Request, res: Response) {
   }
 }
 
-export async function handleProductDelete(req: Request, res: Response) {
+export async function handleProductsDelete(req: Request, res: Response) {
   const { productId } = req.params;
 
   if (!productId) {
