@@ -3,7 +3,12 @@ import fs from 'fs';
 import { Request, Response } from 'express';
 import { v2 as cloudinary } from 'cloudinary';
 
-import { createProduct, readProducts, deleteProduct } from '../db/index';
+import {
+  createProduct,
+  readProducts,
+  updateProduct,
+  deleteProduct,
+} from '../db/index';
 
 dotenv.config();
 cloudinary.config({
@@ -79,6 +84,34 @@ export async function handleProductsGet(req: Request, res: Response) {
   } catch (error) {
     console.error('Error reading products:', error);
     res.status(500).json({ errMsg: 'Error reading products' });
+    return;
+  }
+}
+
+export async function handleProductsPut(req: Request, res: Response) {
+  const { productId } = req.params;
+  const { name, description, price, quantity } = req.body;
+
+  if (!productId || !name || !price || !quantity) {
+    res
+      .status(400)
+      .json({ errMsg: 'productId, name, price, and quantity are required' });
+    return;
+  }
+
+  try {
+    await updateProduct(
+      productId,
+      name.trim(),
+      description.trim(),
+      +price,
+      +quantity
+    );
+
+    res.json({ msg: 'Product updated successfully' });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ errMsg: 'Error updating product' });
     return;
   }
 }

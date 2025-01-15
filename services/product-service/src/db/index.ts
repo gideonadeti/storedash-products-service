@@ -44,6 +44,32 @@ export async function createProduct(
   }
 }
 
+export async function updateProduct(
+  productId: string,
+  name: string,
+  description: string,
+  price: number,
+  quantity: number
+) {
+  try {
+    await prismaClient.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        name,
+        description,
+        price,
+        quantity,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+
+    throw error;
+  }
+}
+
 export async function deleteProduct(productId: string) {
   try {
     await prismaClient.product.delete({
