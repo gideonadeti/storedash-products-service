@@ -1,23 +1,33 @@
 {
   "name": "@storedash/product-service",
   "version": "1.0.0",
-  "main": "src/server.ts",
+  "description": "Product Service of StoreDash microservice",
+  "main": "build/index.js",
   "license": "ISC",
-  "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --watch src --exec ts-node index.ts",
+    "build": "prisma generate && tsc",
+    "start": "node build/index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
     "cloudinary": "^2.5.1",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/debug": "^4.1.12",
     "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
     "@types/multer": "^1.4.12",
-    "prisma": "^6.2.1"
+    "@types/node": "^22.10.7",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.2.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }
