@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const logger = debug('@storedash/product-service:server');
+const logger = debug('product-service:server');
 const port = normalizePort(process.env.PORT || '3000');
 
 app.set('port', port);

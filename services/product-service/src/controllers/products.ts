@@ -6,7 +6,9 @@ import { v2 as cloudinary } from 'cloudinary';
 import {
   createProduct,
   readProducts,
+  readProduct,
   updateProduct,
+  updateProduct2,
   deleteProduct,
 } from '../db/index';
 
@@ -17,56 +19,55 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function handleProductsPost(req: Request, res: Response) {
-  const { distributorId } = req.query;
-  const { name, description, price, quantity } = req.body;
-  const files = req.files;
-
-  if (!distributorId || !name || !price || !quantity) {
-    res
-      .status(400)
-      .json({ errMsg: 'distributorId, name, price, quantity is required' });
-    return;
-  }
-
-  let imageUrls: string[] = [];
-
-  if (Array.isArray(files) && files.length > 0) {
-    const uploadPromises = files.map(async (file) => {
-      const result = await cloudinary.uploader.upload(file.path, {
-        folder: 'product-images',
-      });
-
-      fs.unlinkSync(file.path);
-
-      return result;
+async function uploadImages(files: Express.Multer.File[]) {
+  const uploadPromises = files.map(async (file) => {
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: 'product-images',
     });
 
-    try {
-      const uploadResults = await Promise.all(uploadPromises);
-      imageUrls = uploadResults.map((result) => result.secure_url);
-    } catch (error) {
-      console.error('Error uploading images:', error);
-      res.status(500).json({ errMsg: 'Error uploading images' });
+    fs.unlinkSync(file.path);
+
+    return result.secure_url;
+  });
+
+  return await Promise.all(uploadPromises);
+}
+
+export async function handleProductsPost(req: Request, res: Response) {
+  try {
+    const { distributorId } = req.query;
+    const { name, description, price, quantity } = req.body;
+    const files = req.files;
+
+    if (!distributorId || !name || !price || !quantity) {
+      res
+        .status(400)
+        .json({ errMsg: 'distributorId, name, price, quantity is required' });
+
       return;
     }
-  }
 
-  try {
+    let imageUrls: string[] = [];
+
+    if (Array.isArray(files) && files.length > 0) {
+      imageUrls = await uploadImages(files);
+    }
+
     await createProduct(
       distributorId as string,
       name.trim(),
-      description.trim(),
-      +price,
-      +quantity,
+      description?.trim(),
+      parseFloat(price),
+      parseInt(quantity),
       imageUrls
     );
 
-    res.status(201).json({ msg: 'Product created successfully' });
+    res
+      .status(201)
+      .json({ status: 'success', message: 'Product created successfully' });
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ errMsg: 'Error creating product' });
-    return;
   }
 }
 
@@ -74,18 +75,20 @@ export async function handleProductsGet(req: Request, res: Response) {
   const { distributorId } = req.query;
 
   if (!distributorId) {
-    res.status(400).json({ errMsg: 'distributorId is required' });
+    res
+      .status(400)
+      .json({ status: 'error', errMsg: 'distributorId is required' });
+
     return;
   }
 
   try {
     const products = await readProducts(distributorId as string);
 
-    res.json(products);
+    res.status(200).json({ products });
   } catch (error) {
     console.error('Error reading products:', error);
     res.status(500).json({ errMsg: 'Error reading products' });
-    return;
   }
 }
 
@@ -97,6 +100,7 @@ export async function handleProductsPut(req: Request, res: Response) {
     res
       .status(400)
       .json({ errMsg: 'productId, name, price, and quantity are required' });
+
     return;
   }
 
@@ -104,16 +108,79 @@ export async function handleProductsPut(req: Request, res: Response) {
     await updateProduct(
       productId,
       name.trim(),
-      description.trim(),
-      +price,
-      +quantity
+      description?.trim(),
+      parseFloat(price),
+      parseInt(quantity)
     );
 
-    res.json({ msg: 'Product updated successfully' });
+    res
+      .status(200)
+      .json({ status: 'success', message: 'Product updated successfully' });
   } catch (error) {
     console.error('Error updating product:', error);
     res.status(500).json({ errMsg: 'Error updating product' });
+  }
+}
+
+export async function handleProductsPatch(req: Request, res: Response) {
+  const { productId } = req.params;
+  const { imageUrls } = req.body;
+  const files = req.files;
+
+  if (!productId) {
+    res.status(400).json({ errMsg: 'productId is required' });
+
     return;
+  }
+
+  try {
+    const existingProduct = await readProduct(productId);
+
+    if (!existingProduct) {
+      res.status(404).json({ status: 'error', errMsg: 'Invalid productId' });
+
+      return;
+    }
+
+    if (imageUrls && imageUrls.length > 0) {
+      await Promise.all(
+        imageUrls.map(async (url: string) => {
+          await cloudinary.uploader.destroy(url);
+        })
+      );
+
+      const updatedImageUrls = existingProduct.imageUrls.filter(
+        (url) => !imageUrls.includes(url)
+      );
+
+      await updateProduct2(productId, updatedImageUrls);
+
+      res.json({ msg: 'Images removed successfully' });
+
+      return;
+    }
+
+    if (Array.isArray(files) && files.length > 0) {
+      if (existingProduct.imageUrls.length + files.length > 5) {
+        res.status(400).json({
+          errMsg: 'Cannot upload more than 5 images',
+        });
+
+        return;
+      }
+
+      const newImageUrls = await uploadImages(files);
+      const updatedImageUrls = [...existingProduct.imageUrls, ...newImageUrls];
+
+      await updateProduct2(productId, updatedImageUrls);
+
+      res
+        .status(200)
+        .json({ status: 'success', message: 'Images uploaded successfully' });
+    }
+  } catch (error) {
+    console.error('Error updating product images:', error);
+    res.status(500).json({ errMsg: 'Error updating product images' });
   }
 }
 
@@ -121,17 +188,17 @@ export async function handleProductsDelete(req: Request, res: Response) {
   const { productId } = req.params;
 
   if (!productId) {
-    res.status(400).json({ errMsg: 'productId is required' });
+    res.status(400).json({ status: 'error', errMsg: 'productId is required' });
+
     return;
   }
 
   try {
     await deleteProduct(productId);
 
-    res.json({ msg: 'Product deleted successfully' });
+    res.json({ status: 'success', message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ errMsg: 'Error deleting product' });
-    return;
   }
 }

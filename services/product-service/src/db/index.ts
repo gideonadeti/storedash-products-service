@@ -18,6 +18,22 @@ export async function readProducts(distributorId: string) {
   }
 }
 
+export async function readProduct(productId: string) {
+  try {
+    const product = await prismaClient.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
+
+    return product;
+  } catch (error) {
+    console.error('Error reading product:', error);
+
+    throw error;
+  }
+}
+
 export async function createProduct(
   distributorId: string,
   name: string,
@@ -61,6 +77,24 @@ export async function updateProduct(
         description,
         price,
         quantity,
+      },
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+
+    throw error;
+  }
+}
+
+// Update product imageUrls
+export async function updateProduct2(productId: string, imageUrls: string[]) {
+  try {
+    await prismaClient.product.update({
+      where: {
+        id: productId,
+      },
+      data: {
+        imageUrls,
       },
     });
   } catch (error) {
