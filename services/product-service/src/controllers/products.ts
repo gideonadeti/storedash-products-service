@@ -92,6 +92,27 @@ export async function handleProductsGet(req: Request, res: Response) {
   }
 }
 
+export async function handleProductGet(req: Request, res: Response) {
+  const { productId } = req.params;
+
+  if (!productId) {
+    res.status(400).json({
+      errMsg: 'productId is required',
+    });
+  }
+
+  try {
+    const product = await readProduct(productId);
+
+    res.json({ product });
+
+    return;
+  } catch (error) {
+    console.error('Error reading product:', error);
+    res.status(500).json({ errMsg: 'Error reading product' });
+  }
+}
+
 export async function handleProductsPut(req: Request, res: Response) {
   const { productId } = req.params;
   const { name, description, price, quantity } = req.body;
