@@ -62,9 +62,7 @@ export async function handleProductsPost(req: Request, res: Response) {
       imageUrls
     );
 
-    res
-      .status(201)
-      .json({ status: 'success', message: 'Product created successfully' });
+    res.status(201).json({ message: 'Product created successfully' });
   } catch (error) {
     console.error('Error creating product:', error);
     res.status(500).json({ errMsg: 'Error creating product' });
@@ -134,9 +132,7 @@ export async function handleProductsPut(req: Request, res: Response) {
       parseInt(quantity)
     );
 
-    res
-      .status(200)
-      .json({ status: 'success', message: 'Product updated successfully' });
+    res.status(200).json({ message: 'Product updated successfully' });
   } catch (error) {
     console.error('Error updating product:', error);
     res.status(500).json({ errMsg: 'Error updating product' });
@@ -195,9 +191,7 @@ export async function handleProductsPatch(req: Request, res: Response) {
 
       await updateProduct2(productId, updatedImageUrls);
 
-      res
-        .status(200)
-        .json({ status: 'success', message: 'Images uploaded successfully' });
+      res.status(200).json({ message: 'Images uploaded successfully' });
     }
   } catch (error) {
     console.error('Error updating product images:', error);
@@ -217,7 +211,7 @@ export async function handleProductsDelete(req: Request, res: Response) {
   try {
     await deleteProduct(productId);
 
-    res.json({ status: 'success', message: 'Product deleted successfully' });
+    res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     console.error('Error deleting product:', error);
     res.status(500).json({ errMsg: 'Error deleting product' });
