@@ -113,7 +113,7 @@ export const handleProductsGet = [
     try {
       const products = await readProducts(distributorId as string);
 
-      res.status(200).json({ products });
+      res.json({ products });
     } catch (error) {
       console.error('Error reading products:', error);
       res.status(500).json({ errMsg: 'Error reading products' });
@@ -192,7 +192,7 @@ export const handleProductsPut = [
         parseInt(quantity)
       );
 
-      res.status(200).json({ message: 'Product updated successfully' });
+      res.json({ message: 'Product updated successfully' });
     } catch (error) {
       console.error('Error updating product:', error);
       res.status(500).json({ errMsg: 'Error updating product' });
@@ -270,7 +270,7 @@ export const handleProductsPatch = [
 
         await updateProduct2(productId, updatedImageUrls);
 
-        res.status(200).json({ message: 'Images uploaded successfully' });
+        res.json({ message: 'Images uploaded successfully' });
       }
     } catch (error) {
       console.error('Error updating product images:', error);
