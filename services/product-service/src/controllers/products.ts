@@ -279,21 +279,31 @@ export const handleProductsPatch = [
   },
 ];
 
-export async function handleProductsDelete(req: Request, res: Response) {
-  const { productId } = req.params;
+export const handleProductsDelete = [
+  param('productId')
+    .trim()
+    .notEmpty()
+    .withMessage('productId is required')
+    .escape(),
 
-  if (!productId) {
-    res.status(400).json({ status: 'error', errMsg: 'productId is required' });
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
 
-    return;
-  }
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
 
-  try {
-    await deleteProduct(productId);
+      return;
+    }
 
-    res.json({ message: 'Product deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ errMsg: 'Error deleting product' });
-  }
-}
+    const { productId } = req.params;
+
+    try {
+      await deleteProduct(productId);
+
+      res.json({ message: 'Product deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      res.status(500).json({ errMsg: 'Error deleting product' });
+    }
+  },
+];
