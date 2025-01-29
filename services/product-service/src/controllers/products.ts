@@ -31,7 +31,7 @@ async function uploadImages(files: Express.Multer.File[]) {
     return result.secure_url;
   });
 
-  return await Promise.all(uploadPromises);
+  return Promise.all(uploadPromises);
 }
 
 export const handleProductsPost = [
