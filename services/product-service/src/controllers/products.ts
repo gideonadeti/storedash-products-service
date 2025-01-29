@@ -200,65 +200,84 @@ export const handleProductsPut = [
   },
 ];
 
-export async function handleProductsPatch(req: Request, res: Response) {
-  const { productId } = req.params;
-  const { imageUrls } = req.body;
-  const files = req.files;
+export const handleProductsPatch = [
+  param('productId')
+    .trim()
+    .notEmpty()
+    .withMessage('productId is required')
+    .escape(),
+  body('imageUrls')
+    .optional()
+    .isArray()
+    .withMessage('imageUrls must be an array'),
 
-  if (!productId) {
-    res.status(400).json({ errMsg: 'productId is required' });
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
 
-    return;
-  }
-
-  try {
-    const existingProduct = await readProduct(productId);
-
-    if (!existingProduct) {
-      res.status(404).json({ status: 'error', errMsg: 'Invalid productId' });
-
-      return;
-    }
-
-    if (imageUrls && imageUrls.length > 0) {
-      await Promise.all(
-        imageUrls.map(async (url: string) => {
-          await cloudinary.uploader.destroy(url);
-        })
-      );
-
-      const updatedImageUrls = existingProduct.imageUrls.filter(
-        (url) => !imageUrls.includes(url)
-      );
-
-      await updateProduct2(productId, updatedImageUrls);
-
-      res.json({ msg: 'Images removed successfully' });
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
 
       return;
     }
 
-    if (Array.isArray(files) && files.length > 0) {
-      if (existingProduct.imageUrls.length + files.length > 5) {
-        res.status(400).json({
-          errMsg: 'Cannot upload more than 5 images',
-        });
+    const { productId } = req.params;
+    const { imageUrls } = req.body;
+    const files = req.files;
+
+    if (!productId) {
+      res.status(400).json({ errMsg: 'productId is required' });
+
+      return;
+    }
+
+    try {
+      const existingProduct = await readProduct(productId);
+
+      if (!existingProduct) {
+        res.status(404).json({ status: 'error', errMsg: 'Invalid productId' });
 
         return;
       }
 
-      const newImageUrls = await uploadImages(files);
-      const updatedImageUrls = [...existingProduct.imageUrls, ...newImageUrls];
+      if (imageUrls && imageUrls.length > 0) {
+        await Promise.all(
+          imageUrls.map((url: string) => cloudinary.uploader.destroy(url))
+        );
 
-      await updateProduct2(productId, updatedImageUrls);
+        const updatedImageUrls = existingProduct.imageUrls.filter(
+          (url) => !imageUrls.includes(url)
+        );
 
-      res.status(200).json({ message: 'Images uploaded successfully' });
+        await updateProduct2(productId, updatedImageUrls);
+
+        res.json({ msg: 'Images removed successfully' });
+
+        return;
+      } else if (Array.isArray(files) && files.length > 0) {
+        if (existingProduct.imageUrls.length + files.length > 5) {
+          res.status(400).json({
+            errMsg: 'Cannot upload more than 5 images',
+          });
+
+          return;
+        }
+
+        const newImageUrls = await uploadImages(files);
+        const updatedImageUrls = [
+          ...existingProduct.imageUrls,
+          ...newImageUrls,
+        ];
+
+        await updateProduct2(productId, updatedImageUrls);
+
+        res.status(200).json({ message: 'Images uploaded successfully' });
+      }
+    } catch (error) {
+      console.error('Error updating product images:', error);
+      res.status(500).json({ errMsg: 'Error updating product images' });
     }
-  } catch (error) {
-    console.error('Error updating product images:', error);
-    res.status(500).json({ errMsg: 'Error updating product images' });
-  }
-}
+  },
+];
 
 export async function handleProductsDelete(req: Request, res: Response) {
   const { productId } = req.params;
