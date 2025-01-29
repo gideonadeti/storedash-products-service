@@ -150,33 +150,55 @@ export const handleProductGet = [
   },
 ];
 
-export async function handleProductsPut(req: Request, res: Response) {
-  const { productId } = req.params;
-  const { name, description, price, quantity } = req.body;
+export const handleProductsPut = [
+  param('productId')
+    .trim()
+    .notEmpty()
+    .withMessage('productId is required')
+    .escape(),
+  body('name').trim().notEmpty().withMessage('name is required').escape(),
+  body('price')
+    .trim()
+    .notEmpty()
+    .withMessage('price is required')
+    .isFloat({ min: 0 })
+    .withMessage('price must be a valid number greater than or equal to 0'),
+  body('quantity')
+    .trim()
+    .notEmpty()
+    .withMessage('quantity is required')
+    .isInt({ min: 0 })
+    .withMessage('quantity must be a valid integer greater than or equal to 0'),
+  body('description').optional().trim().escape(),
 
-  if (!productId || !name || !price || !quantity) {
-    res
-      .status(400)
-      .json({ errMsg: 'productId, name, price, and quantity are required' });
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
 
-    return;
-  }
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
 
-  try {
-    await updateProduct(
-      productId,
-      name.trim(),
-      description?.trim(),
-      parseFloat(price),
-      parseInt(quantity)
-    );
+      return;
+    }
 
-    res.status(200).json({ message: 'Product updated successfully' });
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ errMsg: 'Error updating product' });
-  }
-}
+    const { productId } = req.params;
+    const { name, description, price, quantity } = req.body;
+
+    try {
+      await updateProduct(
+        productId,
+        name.trim(),
+        description?.trim(),
+        parseFloat(price),
+        parseInt(quantity)
+      );
+
+      res.status(200).json({ message: 'Product updated successfully' });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(500).json({ errMsg: 'Error updating product' });
+    }
+  },
+];
 
 export async function handleProductsPatch(req: Request, res: Response) {
   const { productId } = req.params;
