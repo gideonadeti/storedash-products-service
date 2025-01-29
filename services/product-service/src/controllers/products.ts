@@ -121,26 +121,34 @@ export const handleProductsGet = [
   },
 ];
 
-export async function handleProductGet(req: Request, res: Response) {
-  const { productId } = req.params;
+export const handleProductGet = [
+  param('productId')
+    .trim()
+    .notEmpty()
+    .withMessage('productId is required')
+    .escape(),
 
-  if (!productId) {
-    res.status(400).json({
-      errMsg: 'productId is required',
-    });
-  }
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
 
-  try {
-    const product = await readProduct(productId);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
 
-    res.json({ product });
+      return;
+    }
 
-    return;
-  } catch (error) {
-    console.error('Error reading product:', error);
-    res.status(500).json({ errMsg: 'Error reading product' });
-  }
-}
+    const { productId } = req.params;
+
+    try {
+      const product = await readProduct(productId);
+
+      res.json({ product });
+    } catch (error) {
+      console.error('Error reading product:', error);
+      res.status(500).json({ errMsg: 'Error reading product' });
+    }
+  },
+];
 
 export async function handleProductsPut(req: Request, res: Response) {
   const { productId } = req.params;
