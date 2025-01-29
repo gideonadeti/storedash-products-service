@@ -9,7 +9,7 @@ import {
   readProducts,
   readProduct,
   updateProduct,
-  updateProduct2,
+  updateProductImageUrls,
   deleteProduct,
 } from '../db/index';
 
@@ -248,7 +248,7 @@ export const handleProductsPatch = [
           (url) => !imageUrls.includes(url)
         );
 
-        await updateProduct2(productId, updatedImageUrls);
+        await updateProductImageUrls(productId, updatedImageUrls);
 
         res.json({ msg: 'Images removed successfully' });
 
@@ -268,7 +268,7 @@ export const handleProductsPatch = [
           ...newImageUrls,
         ];
 
-        await updateProduct2(productId, updatedImageUrls);
+        await updateProductImageUrls(productId, updatedImageUrls);
 
         res.json({ msg: 'Images uploaded successfully' });
       }

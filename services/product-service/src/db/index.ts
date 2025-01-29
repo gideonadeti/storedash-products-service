@@ -86,8 +86,10 @@ export async function updateProduct(
   }
 }
 
-// Update product imageUrls
-export async function updateProduct2(productId: string, imageUrls: string[]) {
+export async function updateProductImageUrls(
+  productId: string,
+  imageUrls: string[]
+) {
   try {
     await prismaClient.product.update({
       where: {
