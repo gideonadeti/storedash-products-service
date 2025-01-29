@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import { Request, Response } from 'express';
 import { v2 as cloudinary } from 'cloudinary';
+import { body, query, param, validationResult } from 'express-validator';
 
 import {
   createProduct,
@@ -33,41 +34,63 @@ async function uploadImages(files: Express.Multer.File[]) {
   return await Promise.all(uploadPromises);
 }
 
-export async function handleProductsPost(req: Request, res: Response) {
-  try {
-    const { distributorId } = req.query;
-    const { name, description, price, quantity } = req.body;
-    const files = req.files;
+export const handleProductsPost = [
+  query('distributorId')
+    .trim()
+    .notEmpty()
+    .withMessage('distributorId is required')
+    .escape(),
+  body('name').trim().notEmpty().withMessage('name is required').escape(),
+  body('price')
+    .trim()
+    .notEmpty()
+    .withMessage('price is required')
+    .isFloat({ min: 0 })
+    .withMessage('price must be a valid number greater than or equal to 0'),
+  body('quantity')
+    .trim()
+    .notEmpty()
+    .withMessage('quantity is required')
+    .isInt({ min: 0 })
+    .withMessage('quantity must be a valid integer greater than or equal to 0'),
+  body('description').optional().trim().escape(),
 
-    if (!distributorId || !name || !price || !quantity) {
-      res
-        .status(400)
-        .json({ errMsg: 'distributorId, name, price, quantity is required' });
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
 
       return;
     }
 
+    const { distributorId } = req.query;
+    const { name, description, price, quantity } = req.body;
+    const files = req.files;
+
     let imageUrls: string[] = [];
 
-    if (Array.isArray(files) && files.length > 0) {
-      imageUrls = await uploadImages(files);
+    try {
+      if (Array.isArray(files) && files.length > 0) {
+        imageUrls = await uploadImages(files);
+      }
+
+      await createProduct(
+        distributorId as string,
+        name.trim(),
+        description?.trim(),
+        parseFloat(price),
+        parseInt(quantity, 10),
+        imageUrls
+      );
+
+      res.status(201).json({ message: 'Product created successfully' });
+    } catch (error) {
+      console.error('Error creating product:', error);
+      res.status(500).json({ errMsg: 'Error creating product' });
     }
-
-    await createProduct(
-      distributorId as string,
-      name.trim(),
-      description?.trim(),
-      parseFloat(price),
-      parseInt(quantity),
-      imageUrls
-    );
-
-    res.status(201).json({ message: 'Product created successfully' });
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ errMsg: 'Error creating product' });
-  }
-}
+  },
+];
 
 export async function handleProductsGet(req: Request, res: Response) {
   const { distributorId } = req.query;
