@@ -11,7 +11,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// API Routes
+// API Route
 app.use('/api/products', productsRouter);
 
 // 404 Error handler
