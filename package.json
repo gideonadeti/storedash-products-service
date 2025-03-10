@@ -10,7 +10,8 @@
     "dev:inventory": "pnpm --filter \"./services/inventoryservice\" dev",
     "dev:product": "pnpm --filter \"./services/product-service\" dev",
     "debug:list-services": "pnpm m ls",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:product": "pnpm --filter \"./services/product-service\" run build"
   },
   "keywords": [],
   "author": "",
