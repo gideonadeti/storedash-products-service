@@ -20,6 +20,7 @@ model Product {
   vat            Float
   isPublished    Boolean   @default(false)
   isOnPromo      Boolean   @default(false)
+  sku            String
   promoPrice     Float?
   promoStartTime DateTime?
   promoEndTime   DateTime?
