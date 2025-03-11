@@ -26,7 +26,13 @@ async function uploadImages(files: Express.Multer.File[]) {
       folder: 'product-images',
     });
 
-    fs.unlinkSync(file.path);
+    fs.unlink(file.path, (err) => {
+      if (err) {
+        console.error('Error deleting file:', err);
+
+        throw err;
+      }
+    });
 
     return result.secure_url;
   });
@@ -53,6 +59,14 @@ export const handleProductsPost = [
     .withMessage('quantity is required')
     .isInt({ min: 0 })
     .withMessage('quantity must be a valid integer greater than or equal to 0'),
+  body('categoryId').trim().notEmpty().withMessage('categoryId').escape(),
+  body('subCategoryId').trim().notEmpty().withMessage('categoryId').escape(),
+  body('vat').trim().notEmpty().withMessage('vat is required').escape(),
+  body('isPublished').trim().notEmpty().withMessage('isPublished is required'),
+  body('isOnPromo').trim().notEmpty().withMessage('isOnPromo is required'),
+  body('promoPrice').optional().trim().escape(),
+  body('promoStartTime').optional().trim().escape(),
+  body('promoEndTime').optional().trim().escape(),
   body('description').optional().trim().escape(),
 
   async (req: Request, res: Response) => {
@@ -65,7 +79,21 @@ export const handleProductsPost = [
     }
 
     const { distributorId } = req.query;
-    const { name, description, price, quantity } = req.body;
+    const {
+      name,
+      price,
+      quantity,
+      categoryId,
+      subCategoryId,
+      vat,
+      isPublished,
+      isOnPromo,
+      sku,
+      promoPrice,
+      promoStartTime,
+      promoEndTime,
+      description,
+    } = req.body;
     const files = req.files;
 
     let imageUrls: string[] = [];
@@ -75,16 +103,25 @@ export const handleProductsPost = [
         imageUrls = await uploadImages(files);
       }
 
-      await createProduct(
+      const product = await createProduct(
         distributorId as string,
         name.trim(),
-        description?.trim(),
         parseFloat(price),
-        parseInt(quantity, 10),
-        imageUrls
+        Number(quantity),
+        imageUrls,
+        categoryId.trim(),
+        subCategoryId.trim(),
+        Number(vat),
+        isPublished === 'true',
+        isOnPromo === 'true',
+        sku.trim(),
+        Number(promoPrice),
+        promoStartTime,
+        promoEndTime,
+        description?.trim()
       );
 
-      res.status(201).json({ msg: 'Product created successfully' });
+      res.status(201).json({ product });
     } catch (error) {
       console.error('Error creating product:', error);
       res.status(500).json({ errMsg: 'Error creating product' });

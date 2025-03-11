@@ -37,22 +37,42 @@ export async function readProduct(productId: string) {
 export async function createProduct(
   distributorId: string,
   name: string,
-  description: string,
   price: number,
   quantity: number,
-  imageUrls: string[]
+  imageUrls: string[],
+  categoryId: string,
+  subCategoryId: string,
+  vat: number,
+  isPublished: boolean,
+  isOnPromo: boolean,
+  sku: string,
+  promoPrice?: number,
+  promoStartTime?: Date,
+  promoEndTime?: Date,
+  description?: string
 ) {
   try {
-    await prismaClient.product.create({
+    const product = await prismaClient.product.create({
       data: {
         distributorId,
         name,
-        description,
         price,
         quantity,
         imageUrls,
+        categoryId,
+        subCategoryId,
+        vat,
+        isPublished,
+        isOnPromo,
+        sku,
+        promoPrice,
+        promoStartTime,
+        promoEndTime,
+        description,
       },
     });
+
+    return product;
   } catch (error) {
     console.error('Error creating product:', error);
 
