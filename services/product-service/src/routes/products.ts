@@ -5,6 +5,8 @@ import {
   handleProductsPost,
   handleProductsGet,
   handleProductGet,
+  handleCategoriesGet,
+  handleSubCategoriesGet,
   handleProductsPut,
   handleProductsPatch,
   handleProductsDelete,
@@ -15,6 +17,8 @@ const upload = multer({ dest: 'temp/' });
 
 router.post('/', upload.array('images', 5), handleProductsPost);
 router.get('/', handleProductsGet);
+router.get('/categories', handleCategoriesGet);
+router.get('/sub-categories', handleSubCategoriesGet);
 router.get('/:productId', handleProductGet);
 router.put('/:productId', handleProductsPut);
 router.patch('/:productId', upload.array('images', 5), handleProductsPatch);

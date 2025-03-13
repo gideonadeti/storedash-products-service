@@ -11,6 +11,8 @@ import {
   updateProduct,
   updateProductImageUrls,
   deleteProduct,
+  readCategories,
+  readSubCategories,
 } from '../db/index';
 
 dotenv.config();
@@ -157,6 +159,28 @@ export const handleProductsGet = [
     }
   },
 ];
+
+export const handleCategoriesGet = async (req: Request, res: Response) => {
+  try {
+    const categories = await readCategories();
+
+    res.json({ categories });
+  } catch (error) {
+    console.error('Error reading categories', error);
+    res.status(500).json({ errMsg: 'Error reading categories' });
+  }
+};
+
+export const handleSubCategoriesGet = async (req: Request, res: Response) => {
+  try {
+    const subCategories = await readSubCategories();
+
+    res.json({ subCategories });
+  } catch (error) {
+    console.error('Error reading subCategories', error);
+    res.status(500).json({ errMsg: 'Error reading subCategories' });
+  }
+};
 
 export const handleProductGet = [
   param('productId')

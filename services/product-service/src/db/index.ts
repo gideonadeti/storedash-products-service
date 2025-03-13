@@ -160,3 +160,27 @@ export async function deleteProduct(productId: string) {
     throw error;
   }
 }
+
+export const readCategories = async () => {
+  try {
+    const categories = await prismaClient.category.findMany();
+
+    return categories;
+  } catch (error) {
+    console.error('Error reading categories:', error);
+
+    throw error;
+  }
+};
+
+export const readSubCategories = async () => {
+  try {
+    const subCategories = await prismaClient.subCategory.findMany();
+
+    return subCategories;
+  } catch (error) {
+    console.error('Error reading subCategories:', error);
+
+    throw error;
+  }
+};
