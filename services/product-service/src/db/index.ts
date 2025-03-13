@@ -93,7 +93,20 @@ export async function createProduct(
       },
     });
 
-    return product;
+    const [category, subCategory] = await Promise.all([
+      prismaClient.category.findUnique({
+        where: {
+          id: product.categoryId,
+        },
+      }),
+      prismaClient.subCategory.findUnique({
+        where: {
+          id: product.subCategoryId,
+        },
+      }),
+    ]);
+
+    return { ...product, category, subCategory };
   } catch (error) {
     console.error('Error creating product:', error);
 
