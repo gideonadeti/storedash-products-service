@@ -2,6 +2,26 @@ import { PrismaClient } from '@prisma/client';
 
 const prismaClient = new PrismaClient();
 
+interface Product {
+  distributorId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageUrls: string[];
+  categoryName: string;
+  subCategoryName: string;
+  vat: number;
+  isPublished?: boolean;
+  isOnPromo?: boolean;
+  sku: string;
+  weight: number;
+  nafdacRegistrationId: string;
+  promoPrice?: number;
+  promoStartTime?: Date;
+  promoEndTime?: Date;
+  description?: string;
+}
+
 export async function readProducts(distributorId: string) {
   try {
     // Fetch products first
@@ -10,28 +30,32 @@ export async function readProducts(distributorId: string) {
     });
 
     // Extract unique category and subCategory IDs
-    const categoryIds = [...new Set(products.map((p) => p.categoryId))];
-    const subCategoryIds = [...new Set(products.map((p) => p.subCategoryId))];
+    const categoryNames = [...new Set(products.map((p) => p.categoryName))];
+    const subCategoryNames = [
+      ...new Set(products.map((p) => p.subCategoryName)),
+    ];
 
     // Run category and subCategory queries in parallel
     const [categories, subCategories] = await Promise.all([
-      prismaClient.category.findMany({ where: { id: { in: categoryIds } } }),
+      prismaClient.category.findMany({
+        where: { name: { in: categoryNames } },
+      }),
       prismaClient.subCategory.findMany({
-        where: { id: { in: subCategoryIds } },
+        where: { name: { in: subCategoryNames } },
       }),
     ]);
 
     // Convert arrays to maps for fast lookups
-    const categoryMap = Object.fromEntries(categories.map((c) => [c.id, c]));
+    const categoryMap = Object.fromEntries(categories.map((c) => [c.name, c]));
     const subCategoryMap = Object.fromEntries(
-      subCategories.map((sc) => [sc.id, sc])
+      subCategories.map((sc) => [sc.name, sc])
     );
 
     // Attach category and subCategory objects to products
     return products.map((product) => ({
       ...product,
-      category: categoryMap[product.categoryId] || null,
-      subCategory: subCategoryMap[product.subCategoryId] || null,
+      category: categoryMap[product.categoryName] || null,
+      subCategory: subCategoryMap[product.subCategoryName] || null,
     }));
   } catch (error) {
     console.error('Error reading products:', error);
@@ -55,23 +79,25 @@ export async function readProduct(productId: string) {
   }
 }
 
-export async function createProduct(
-  distributorId: string,
-  name: string,
-  price: number,
-  quantity: number,
-  imageUrls: string[],
-  categoryId: string,
-  subCategoryId: string,
-  vat: number,
-  isPublished: boolean,
-  isOnPromo: boolean,
-  sku: string,
-  promoPrice?: number,
-  promoStartTime?: Date,
-  promoEndTime?: Date,
-  description?: string
-) {
+export async function createProduct({
+  distributorId,
+  name,
+  price,
+  quantity,
+  imageUrls,
+  categoryName,
+  subCategoryName,
+  vat,
+  isPublished,
+  isOnPromo,
+  sku,
+  weight,
+  nafdacRegistrationId,
+  promoPrice,
+  promoStartTime,
+  promoEndTime,
+  description,
+}: Product) {
   try {
     const product = await prismaClient.product.create({
       data: {
@@ -80,12 +106,14 @@ export async function createProduct(
         price,
         quantity,
         imageUrls,
-        categoryId,
-        subCategoryId,
+        categoryName,
+        subCategoryName,
         vat,
         isPublished,
         isOnPromo,
         sku,
+        weight,
+        nafdacRegistrationId,
         promoPrice,
         promoStartTime,
         promoEndTime,
@@ -96,12 +124,12 @@ export async function createProduct(
     const [category, subCategory] = await Promise.all([
       prismaClient.category.findUnique({
         where: {
-          id: product.categoryId,
+          id: product.categoryName,
         },
       }),
       prismaClient.subCategory.findUnique({
         where: {
-          id: product.subCategoryId,
+          id: product.subCategoryName,
         },
       }),
     ]);
@@ -193,6 +221,60 @@ export const readSubCategories = async () => {
     return subCategories;
   } catch (error) {
     console.error('Error reading subCategories:', error);
+
+    throw error;
+  }
+};
+
+export const readCategoryNames = async () => {
+  try {
+    const categories = await prismaClient.category.findMany({
+      select: { name: true },
+    });
+
+    return categories.map((c) => c.name);
+  } catch (error) {
+    console.error('Error reading category names:', error);
+
+    throw error;
+  }
+};
+
+export const readSubCategoryNames = async () => {
+  try {
+    const subCategories = await prismaClient.subCategory.findMany({
+      select: { name: true },
+    });
+
+    return subCategories.map((c) => c.name);
+  } catch (error) {
+    console.error('Error reading subCategory names:', error);
+
+    throw error;
+  }
+};
+
+export const readSkus = async () => {
+  try {
+    const skus = await prismaClient.product.findMany({
+      select: { sku: true },
+    });
+
+    return skus.map((c) => c.sku);
+  } catch (error) {
+    console.error('Error reading skus:', error);
+
+    throw error;
+  }
+};
+
+export const createProducts = async (products: Product[]) => {
+  try {
+    await prismaClient.product.createMany({
+      data: products,
+    });
+  } catch (error) {
+    console.error('Error creating products:', error);
 
     throw error;
   }

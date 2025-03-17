@@ -8,36 +8,39 @@ datasource db {
 }
 
 model Product {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  distributorId  String
-  name           String
-  description    String?
-  price          Float
-  quantity       Int
-  imageUrls      String[]
-  categoryId     String
-  subCategoryId  String
-  vat            Float
-  isPublished    Boolean   @default(false)
-  isOnPromo      Boolean   @default(false)
-  sku            String
-  promoPrice     Float?
-  promoStartTime DateTime?
-  promoEndTime   DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id                   String    @id @default(auto()) @map("_id") @db.ObjectId
+  distributorId        String
+  name                 String
+  description          String?
+  price                Float
+  quantity             Int
+  weight               Float
+  nafdacRegistrationId String
+  imageUrls            String[]
+  tags                 String[]
+  categoryName         String
+  subCategoryName      String
+  vat                  Float
+  isPublished          Boolean   @default(false)
+  isOnPromo            Boolean   @default(false)
+  sku                  String
+  promoPrice           Float?
+  promoStartTime       DateTime?
+  promoEndTime         DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 }
 
 model Category {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
+  name      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model SubCategory {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  name       String
+  name       String   @unique
   categoryId String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt

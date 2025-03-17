@@ -10,11 +10,13 @@ import {
   handleProductsPut,
   handleProductsPatch,
   handleProductsDelete,
+  handleProductsBulkAdd,
 } from '../controllers/products';
 
 const router = Router();
 const upload = multer({ dest: 'temp/' });
 
+router.post('/bulk-add', upload.single('csvFile'), handleProductsBulkAdd);
 router.post('/', upload.array('images', 5), handleProductsPost);
 router.get('/', handleProductsGet);
 router.get('/categories', handleCategoriesGet);

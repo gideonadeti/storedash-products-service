@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { v2 as cloudinary } from 'cloudinary';
 import { body, query, param, validationResult } from 'express-validator';
 
+import validateCsv from '../utils/validate-csv';
 import {
   createProduct,
   readProducts,
@@ -13,6 +14,7 @@ import {
   deleteProduct,
   readCategories,
   readSubCategories,
+  createProducts,
 } from '../db/index';
 
 dotenv.config();
@@ -91,6 +93,8 @@ export const handleProductsPost = [
       isPublished,
       isOnPromo,
       sku,
+      weight,
+      nafdacRegistrationId,
       promoPrice,
       promoStartTime,
       promoEndTime,
@@ -105,23 +109,25 @@ export const handleProductsPost = [
         imageUrls = await uploadImages(files);
       }
 
-      const product = await createProduct(
-        distributorId as string,
-        name.trim(),
-        parseFloat(price),
-        Number(quantity),
+      const product = await createProduct({
+        distributorId: distributorId as string,
+        name: name.trim(),
+        price: parseFloat(price),
+        quantity: Number(quantity),
         imageUrls,
-        categoryId.trim(),
-        subCategoryId.trim(),
-        Number(vat),
-        isPublished === 'true',
-        isOnPromo === 'true',
-        sku.trim(),
-        Number(promoPrice),
+        categoryName: categoryId.trim(),
+        subCategoryName: subCategoryId.trim(),
+        vat: Number(vat),
+        weight: Number(weight),
+        nafdacRegistrationId: nafdacRegistrationId.trim(),
+        isPublished: isPublished === 'true',
+        isOnPromo: isOnPromo === 'true',
+        sku: sku.trim(),
+        promoPrice: Number(promoPrice),
         promoStartTime,
         promoEndTime,
-        description?.trim()
-      );
+        description: description?.trim(),
+      });
 
       res.status(201).json({ product });
     } catch (error) {
@@ -368,3 +374,45 @@ export const handleProductsDelete = [
     }
   },
 ];
+
+export const handleProductsBulkAdd = async (req: Request, res: Response) => {
+  const csvFile = req.file;
+  const { distributorId } = req.query;
+
+  if (!csvFile) {
+    res.status(400).json({ errMsg: 'No valid file was uploaded' });
+    return;
+  }
+
+  try {
+    const csvText = await fs.promises.readFile(csvFile.path, 'utf-8');
+
+    const validatedCsv = await validateCsv(csvText);
+
+    const cleanedUpCsv = validatedCsv.map((row) => {
+      return {
+        distributorId: distributorId as string,
+        name: row.name,
+        description: row.description,
+        categoryName: row.categoryName,
+        subCategoryName: row.subCategoryName,
+        sku: row.sku,
+        vat: Number(row.vat),
+        price: Number(row.price),
+        quantity: Number(row.quantity),
+        weight: Number(row.weight),
+        nafdacRegistrationId: row.nafdacRegistrationId,
+        imageUrls: row.imageUrls?.split(',').map((url) => url.trim()) || [],
+        tags: row.tags?.split(',').map((tag) => tag.trim()) || [],
+      };
+    });
+
+    await createProducts(cleanedUpCsv);
+
+    res.sendStatus(201);
+  } catch (error) {
+    console.error('Error adding products:', error);
+
+    res.status(500).json({ errMsg: 'Error adding products' });
+  }
+};
